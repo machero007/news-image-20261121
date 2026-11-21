@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
-"""make.fun entry: Sum up 21 November's world news in one image.
+"""Entry point for news-image-20261121 (make.fun daily news-image bounty).
 
-The simplest allowed program: copy the image this repository holds
-(entry.png) to /output/entry.png. Deterministic (same bytes every run),
-no network access, no dependencies beyond the standard library.
+Stdlib only. Verifies the bundled entry.png is a real PNG, then places a
+byte-identical copy at /output/entry.png for the grader to read.
 """
-import os
-import shutil
+
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+SOURCE = HERE / "entry.png"
+DEST = Path("/output") / "entry.png"
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
-def main() -> None:
-    here = os.path.dirname(os.path.abspath(__file__))
-    src = os.path.join(here, "entry.png")
-    os.makedirs("/output", exist_ok=True)
-    shutil.copyfile(src, "/output/entry.png")
+def main() -> int:
+    payload = SOURCE.read_bytes()
+    if not payload.startswith(PNG_MAGIC):
+        raise SystemExit("entry.png does not start with the PNG magic bytes")
+    DEST.parent.mkdir(parents=True, exist_ok=True)
+    DEST.write_bytes(payload)
+    print(f"wrote {DEST} ({len(payload)} bytes)")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
