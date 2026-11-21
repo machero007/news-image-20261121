@@ -249,6 +249,8 @@ def draw_footer(draw):
 
 def build():
     image = Image.new("RGB", (W, H), PALETTE["bg"])
+    if image.size != (W, H):
+        raise SystemExit(f"canvas is {image.size}, expected {(W, H)}")
     draw = ImageDraw.Draw(image)
     draw_header(draw)
     draw_stories(draw)
@@ -256,7 +258,10 @@ def build():
     draw_wire(draw)
     draw_footer(draw)
     image.save(OUT, format="PNG")
-    return OUT.read_bytes()
+    data = OUT.read_bytes()
+    if len(data) > 1 << 20:
+        raise SystemExit(f"entry.png is {len(data)} bytes, over the 1 MiB limit")
+    return data
 
 
 def report_measurements():
